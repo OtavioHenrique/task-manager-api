@@ -30,12 +30,12 @@ group :development, :test do
   # Call "byebug" anywhere in the code to stop execution and get a debugger console
   gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
   gem "rspec-rails", "~> 3.6"
+  gem "faker", :git => "git://github.com/stympy/faker.git", :branch => "master"
+  gem "factory_girl_rails"
 end
 
 group :test do
   gem "database_cleaner"
-  gem "faker", :git => "git://github.com/stympy/faker.git", :branch => "master"
-  gem "factory_girl_rails"
   gem "shoulda-matchers", git: "https://github.com/thoughtbot/shoulda-matchers.git", branch: "rails-5"
 end
 
