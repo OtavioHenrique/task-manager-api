@@ -9,25 +9,43 @@ RSpec.describe 'Users API', type: :request  do
   describe "GET /users/:id" do
     before do
       headers = { "Accept" => "application/json" }
-      get "/users/#{user_id}", params: {}, headers: headers
+        get "/users/#{user_id}", params: {}, headers: headers
+      end
+
+      context "when user exists" do
+        it "should return the user" do
+          user_response = JSON.parse(response.body)
+          expect(user_response["id"]).to eq(user_id)
+        end
+
+        it "should return 200 status" do
+          expect(response).to have_http_status(200)
+        end
+      end
+
+      context "when users dont exist" do
+        let(:user_id) { 40 }
+
+      it "should return 404 status" do
+        expect(response).to have_http_status(404)
+      end
+    end
+  end
+
+  describe "GET /users" do
+    before do
+      headers = { "Accept" => "application/json" }
+      get "/users", params: {}, headers: headers
     end
 
-    context "when user exists" do
-      it "should return the user" do
+    context "when exists users on db" do
+      it "shoul return users" do
         user_response = JSON.parse(response.body)
-        expect(user_response["id"]).to eq(user_id)
+        expect(user_response.first["id"]).to eq(user_id)
       end
 
       it "should return 200 status" do
         expect(response).to have_http_status(200)
-      end
-    end
-
-    context "when users dont exist" do
-      let(:user_id) { 40 }
-
-      it "should return 404 status" do
-        expect(response).to have_http_status(404)
       end
     end
   end
