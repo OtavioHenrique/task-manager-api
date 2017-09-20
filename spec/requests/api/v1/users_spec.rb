@@ -9,24 +9,24 @@ RSpec.describe 'Users API', type: :request  do
   describe "GET /users/:id" do
     before do
       headers = { "Accept" => "application/json" }
-        get "/users/#{user_id}", params: {}, headers: headers
+      get "/users/#{user_id}", params: {}, headers: headers
+    end
+
+    context "when user exists" do
+      it "returns the user" do
+        user_response = JSON.parse(response.body)
+        expect(user_response["id"]).to eq(user_id)
       end
 
-      context "when user exists" do
-        it "should return the user" do
-          user_response = JSON.parse(response.body)
-          expect(user_response["id"]).to eq(user_id)
-        end
-
-        it "should return 200 status" do
-          expect(response).to have_http_status(200)
-        end
+      it "returns 200 status" do
+        expect(response).to have_http_status(200)
       end
+    end
 
-      context "when users dont exist" do
-        let(:user_id) { 40 }
+    context "when users dont exist" do
+      let(:user_id) { 40 }
 
-      it "should return 404 status" do
+      it "returns 404 status" do
         expect(response).to have_http_status(404)
       end
     end
@@ -39,14 +39,37 @@ RSpec.describe 'Users API', type: :request  do
     end
 
     context "when exists users on db" do
-      it "shoul return users" do
+      it "returns users" do
         user_response = JSON.parse(response.body)
         expect(user_response.first["id"]).to eq(user_id)
       end
 
-      it "should return 200 status" do
+      it "returns 200 status" do
         expect(response).to have_http_status(200)
       end
+    end
+  end
+
+  describe "POST /users" do
+    before do
+      headers = { "Accept" => "application/json" }
+      post "/users", params: { user: user_params }, headers: headers
+    end
+
+    context "when request params are valid" do
+      let(:user_params) { attributes_for(:user) }
+      
+      it "returns correct json for user created" do
+        user_response = JSON.parse(response.body)
+        expect(user_response["email"]).to eq(user_params[:email])
+      end
+
+      it "returns 201 status" do
+        expect(response).to have_http_status(201)
+      end
+    end
+
+    context "when request params are invalid" do
     end
   end
 end
