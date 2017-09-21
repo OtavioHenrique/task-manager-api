@@ -82,4 +82,52 @@ RSpec.describe 'Users API', type: :request  do
       end
     end
   end
+
+  describe "PUT /users/:id" do
+    before do
+      headers = { "Accept" => "application/json" }
+      put "/users/#{user_id}", params: { user: user_params }, headers: headers
+    end
+    
+    context "when request is valid" do
+      let(:user_params) { { email: "new@email.com" } }
+
+      it "returns status code 200" do
+        expect(response).to have_http_status(200)   
+      end
+
+      it "returns json data with updated user" do
+        user_response = JSON.parse(response.body)
+        expect(user_response["email"]).to eq(user_params[:email])
+      end
+    end
+
+    context "when request params is invalid" do
+      let(:user_params) { attributes_for(:user, email: "invalid_email@") }
+
+      it "returns 422 status" do
+        expect(response).to have_http_status(422)
+      end
+
+      it "returns json data with errors" do
+        user_response = JSON.parse(response.body)
+        expect(user_response).to have_key('errors')
+      end
+    end
+  end
+
+  describe "DELETE /users/:id" do
+    before do
+      headers = { "Accept" => "application/json" }
+      delete "/users/#{user_id}", params: {}, headers: headers
+    end
+    
+    it "returns 404" do
+      expect(response).to have_http_status(204)
+    end
+
+    it "remove user from database" do
+      expect(User.find_by(id: user.id)).to be_nil
+    end
+  end
 end
