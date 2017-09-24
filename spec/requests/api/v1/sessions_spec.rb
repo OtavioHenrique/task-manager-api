@@ -41,6 +41,21 @@ RSpec.describe 'Sessions API', type: :request do
         expect(json_body).to have_key("errors")
       end
     end
+  end
 
+  describe 'DELETE /sessions/:id' do
+    let(:auth_token) { user.auth_token }
+
+    before do
+      delete "/sessions/#{auth_token}", params: {}, headers: headers
+    end
+
+    it 'returns 204 status' do
+      expect(response).to have_http_status(204)
+    end
+
+    it 'changes user auth token' do
+      expect( User.find_by(auth_token: auth_token) ).to be_nil
+    end
   end
 end
