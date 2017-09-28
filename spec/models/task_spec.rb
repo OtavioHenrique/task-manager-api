@@ -15,6 +15,6 @@ RSpec.describe Task, type: :model do
   it { is_expected.to respond_to(:user_id) }
   
   context 'when task is new' do
-    it { expect(:task).not_to be_done  }
+    it { expect(task).not_to be_done  }
   end
 end

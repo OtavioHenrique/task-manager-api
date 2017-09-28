@@ -1,9 +1,9 @@
 FactoryGirl.define do
   factory :task do
-    title { Faker::Lorem.setence }
-    description { Faker::Lorem.setence }
+    title { Faker::Lorem.sentence }
+    description { Faker::Lorem.sentence }
     done false 
     deadline { Faker::Date.forward }
-    user_id 1
+    user
   end
 end
