@@ -6,7 +6,7 @@ Rails.application.routes.draw do
     api_version(:module => "V1", :path => {:value => "v1"}) do
       resources :users, only: [:show, :index, :create, :update, :destroy]
       resources :sessions, only: [:create, :destroy]
-      resources :tasks, only: [:index, :show]
+      resources :tasks, only: [:index, :show, :create]
     end
   end
 end
