@@ -82,4 +82,44 @@ RSpec.describe 'Task API' do
       end
     end
   end
+
+  describe 'PUT /task/:id' do
+    let!(:task) { create(:task, user_id: user.id) }
+    
+    before do
+      put "/tasks/#{task.id}", params: { task: task_params }.to_json, headers: headers
+    end
+
+    context 'valid params' do
+      let(:task_params) { { title: 'New Title For Test' } }
+
+      it 'returns status code 200' do
+        expect(response).to have_http_status(200)
+      end
+
+      it 'returns the json with updated task' do
+        expect(json_body['title']).to eq(task_params[:title])
+      end
+
+      it 'updates the task in the database' do
+        expect( Task.find_by(title: task_params[:title]).title).to eq(task_params[:title])
+      end
+    end
+
+    context 'wrong params' do
+      let(:task_params) { { title: '' } }
+
+      it 'returns status code 422' do
+        expect(response).to have_http_status(422)
+      end
+
+      it 'returns json with error' do
+        expect(json_body['errors']).to have_key('title')
+      end
+
+      it 'does not update task in database' do
+        expect( Task.find_by(title: task_params[:title])).to be_nil
+      end
+    end
+  end
 end
