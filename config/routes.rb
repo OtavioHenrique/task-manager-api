@@ -8,5 +8,11 @@ Rails.application.routes.draw do
       resources :sessions, only: [:create, :destroy]
       resources :tasks, only: [:index, :show, :create, :update, :destroy]
     end
+    
+    api_version(:module => "V2", :path => {:value => "v2"}) do
+      resources :users, only: [:show, :index, :create, :update, :destroy]
+      resources :sessions, only: [:create, :destroy]
+      resources :tasks, only: [:index, :show, :create, :update, :destroy]
+    end
   end
 end
