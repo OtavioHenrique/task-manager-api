@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     end
     
     api_version(:module => "V2", :path => {:value => "v2"}) do
+      mount_devise_token_auth_for 'User', at: 'auth'
       resources :users, only: [:show, :index, :create, :update, :destroy]
       resources :sessions, only: [:create, :destroy]
       resources :tasks, only: [:index, :show, :create, :update, :destroy]
