@@ -1,159 +1,162 @@
-require 'rails_helper'
+require "rails_helper"
 
-RSpec.describe 'Task API' do
-  before { host! 'api.task-manager.dev:80/v2' }
+RSpec.describe "Task API" do
+  before { host! "api.task-manager.dev:80/v2"}
 
   let!(:user) { create(:user) }
+  let!(:auth_data) { user.create_new_auth_token }
   let(:headers) do
     {
-      'Content-type' => Mime[:json].to_s,
-      'Accept' => 'application/json',
-      'Authorization' => user.auth_token
+      "Content-type" => Mime[:json].to_s,
+      "Accept" => "application/json",
+      "access-token" => auth_data["access-token"],
+      "uid" => auth_data["uid"],
+      "client" => auth_data["client"]
     }
   end
 
-  describe 'GET /tasks' do
-    context 'when no filter params is sent' do
+  describe "GET /tasks" do
+    context "when no filter params is sent" do
       before do
         create_list(:task, 5, user_id: user.id)
-        get '/tasks', params: {}, headers: headers
+        get "/tasks", params: {}, headers: headers
       end
 
-      it 'expect to receive 200 status' do
+      it "expect to receive 200 status" do
         expect(response).to have_http_status(200)
       end
 
-      it 'returns 5 tasks from database' do
+      it "returns 5 tasks from database" do
         expect(json_body["data"].count).to eq(5)
       end
     end
 
-    context 'when filter and sorting params is sent' do
-      let!(:notebook_task_1) { create(:task, title: 'check if notebook is broken', user_id: user.id) }
-      let!(:notebook_task_2) { create(:task, title: 'buy new notebook', user_id: user.id) }
-      let!(:other_task_1) { create(:task, title: 'fix the dor', user_id: user.id) }
-      let!(:other_task_2) { create(:task, title: 'buy a new car', user_id: user.id) }
+    context "when filter and sorting params is sent" do
+      let!(:notebook_task_1) { create(:task, title: "check if notebook is broken", user_id: user.id) }
+      let!(:notebook_task_2) { create(:task, title: "buy new notebook", user_id: user.id) }
+      let!(:other_task_1) { create(:task, title: "fix the dor", user_id: user.id) }
+      let!(:other_task_2) { create(:task, title: "buy a new car", user_id: user.id) }
 
       before do
-        get '/tasks?q[title_cont]=notebook&q[s]=title+ASC', params: {}, headers: headers
+        get "/tasks?q[title_cont]=notebook&q[s]=title+ASC", params: {}, headers: headers
       end
 
-      it 'returns only task matching and in the correct order' do
-        returned_task_titles = json_body['data'].map { |i| i['attributes']['title']}
+      it "returns only task matching and in the correct order" do
+        returned_task_titles = json_body["data"].map { |i| i["attributes"]["title"]}
 
         expect(returned_task_titles).to eq([notebook_task_2.title, notebook_task_1.title])
       end
     end
   end
 
-  describe 'GET /tasks/:id' do
+  describe "GET /tasks/:id" do
     let(:task) { create(:task, user_id: user.id) }
 
     before { get "/tasks/#{task.id}", params: {}, headers: headers }
 
-    it 'returns status code 200' do
+    it "returns status code 200" do
       expect(response).to have_http_status(200)
     end
 
-    it 'returns the json for task' do
-      expect(json_body['data']['attributes']['title']).to eq(task.title)
+    it "returns the json for task" do
+      expect(json_body["data"]["attributes"]["title"]).to eq(task.title)
     end
   end
 
-  describe 'POST /tasks' do
+  describe "POST /tasks" do
     before do
-      post '/tasks', params: { task: task_params }.to_json, headers: headers
+      post "/tasks", params: { task: task_params }.to_json, headers: headers
     end
     
-    context 'correct params' do
+    context "correct params" do
       let(:task_params) { attributes_for(:task) }
       
-      it 'returns status code 201' do
+      it "returns status code 201" do
         expect(response).to have_http_status(201)
       end
 
-      it 'saves the task in the database' do
+      it "saves the task in the database" do
         expect( Task.find_by(title: task_params[:title])).to_not be_nil
       end
 
-      it 'returns correct json' do
-        expect(json_body['data']['attributes']['title']).to eq(task_params[:title])
+      it "returns correct json" do
+        expect(json_body["data"]["attributes"]["title"]).to eq(task_params[:title])
       end
 
-      it 'assigns the created task to the user' do
-        expect(json_body['data']['attributes']['user-id']).to eq(user.id)
+      it "assigns the created task to the user" do
+        expect(json_body["data"]["attributes"]["user-id"]).to eq(user.id)
       end
     end
 
-    context 'wrong params' do
-      let(:task_params) { attributes_for(:task, title: '') }
+    context "wrong params" do
+      let(:task_params) { attributes_for(:task, title: "") }
 
-      it 'returns status code 422' do
+      it "returns status code 422" do
         expect(response).to have_http_status(422)
       end
 
-      it 'dont save on database' do
+      it "dont save on database" do
         expect( Task.find_by(title: task_params[:title])).to be_nil
       end
 
-      it 'returns json error' do
-        expect(json_body['errors']).to have_key('title')
+      it "returns json error" do
+        expect(json_body["errors"]).to have_key("title")
       end
     end
   end
 
-  describe 'PUT /task/:id' do
+  describe "PUT /task/:id" do
     let!(:task) { create(:task, user_id: user.id) }
     
     before do
       put "/tasks/#{task.id}", params: { task: task_params }.to_json, headers: headers
     end
 
-    context 'valid params' do
-      let(:task_params) { { title: 'New Title For Test' } }
+    context "valid params" do
+      let(:task_params) { { title: "New Title For Test" } }
 
-      it 'returns status code 200' do
+      it "returns status code 200" do
         expect(response).to have_http_status(200)
       end
 
-      it 'returns the json with updated task' do
-        expect(json_body['data']['attributes']['title']).to eq(task_params[:title])
+      it "returns the json with updated task" do
+        expect(json_body["data"]["attributes"]["title"]).to eq(task_params[:title])
       end
 
-      it 'updates the task in the database' do
+      it "updates the task in the database" do
         expect( Task.find_by(title: task_params[:title]).title).to eq(task_params[:title])
       end
     end
 
-    context 'wrong params' do
-      let(:task_params) { { title: '' } }
+    context "wrong params" do
+      let(:task_params) { { title: "" } }
 
-      it 'returns status code 422' do
+      it "returns status code 422" do
         expect(response).to have_http_status(422)
       end
 
-      it 'returns json with error' do
-        expect(json_body['errors']).to have_key('title')
+      it "returns json with error" do
+        expect(json_body["errors"]).to have_key("title")
       end
 
-      it 'does not update task in database' do
+      it "does not update task in database" do
         expect( Task.find_by(title: task_params[:title])).to be_nil
       end
     end
   end
 
-  describe 'DELETE /task/:id' do
+  describe "DELETE /task/:id" do
     let!(:task) { create(:task, user_id: user.id) }
 
     before do
        delete "/tasks/#{task.id}", params: {}, headers: headers
     end
 
-    it 'returns status 204' do
+    it "returns status 204" do
       expect(response).to have_http_status(204)
     end
 
-    it 'removes task from database' do
+    it "removes task from database" do
       expect { Task.find(task.id) }.to raise_error(ActiveRecord::RecordNotFound) 
     end
   end
