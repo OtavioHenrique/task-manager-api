@@ -3,7 +3,7 @@ class Api::V2::TaskSerializer < ActiveModel::Serializer
               :deadline, :user_id, :created_at, :updated_at
 
   def short_description
-    object.description[0..40]
+    object.description[0..40] unless description.nil?
   end
 
   def is_late
